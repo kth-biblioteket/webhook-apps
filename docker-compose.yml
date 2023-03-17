@@ -1,0 +1,24 @@
+services:
+  webhook:
+    container_name: webhook-apps
+    image: ghcr.io/kth-biblioteket/webhook-apps:main
+    restart: always
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grouprooms1.rule=Host(`${HOST}`) && PathPrefix(`${PATHPREFIX}`)"
+      - "traefik.http.routers.webhook.middlewares=webhook-stripprefix"
+      - "traefik.http.middlewares.webhook-stripprefix.stripprefix.prefixes=${PATHPREFIX}"
+      - "traefik.http.routers.webhook.entrypoints=websecure"
+      - "traefik.http.routers.webhook.tls=true"
+      - "traefik.http.routers.webhook.tls.certresolver=myresolver"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /local/docker:/docker:ro
+    networks:
+      - "apps-net"
+
+networks:
+  apps-net:
+    external: true
