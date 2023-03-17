@@ -1,0 +1,26 @@
+{
+  "name": "webhook-apps",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/kth-biblioteket/webhook-apps.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kth-biblioteket/webhook-apps/issues"
+  },
+  "homepage": "https://github.com/kth-biblioteket/webhook-apps#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  }
+}
