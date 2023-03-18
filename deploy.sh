@@ -9,7 +9,7 @@ DOCKER_PATH=${5}
 
 echo "Deploying application..."
 echo {$GIT_EVENT}
-cd $DOCKER_PATH/$GIT_REPOSITORY
+cd /docker/$GIT_REPOSITORY
 docker-compose pull
 docker-compose down
 docker-compose up -d --build
