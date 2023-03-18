@@ -69,6 +69,7 @@ apiRoutes.post('/', async function (req, res, next) {
                     console.error(`exec error: ${error}`);
                     return res.status(401).send({ errorMessage: error });
                 }
+                console.log(stdout);
             });
             console.log("Finished deploy...")
             break;

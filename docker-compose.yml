@@ -1,5 +1,7 @@
+version: '3.6'
+
 services:
-  webhook:
+  webhook-apps:
     container_name: webhook-apps
     image: ghcr.io/kth-biblioteket/webhook-apps:main
     restart: always
@@ -7,12 +9,12 @@ services:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grouprooms1.rule=Host(`${HOST}`) && PathPrefix(`${PATHPREFIX}`)"
-      - "traefik.http.routers.webhook.middlewares=webhook-stripprefix"
-      - "traefik.http.middlewares.webhook-stripprefix.stripprefix.prefixes=${PATHPREFIX}"
-      - "traefik.http.routers.webhook.entrypoints=websecure"
-      - "traefik.http.routers.webhook.tls=true"
-      - "traefik.http.routers.webhook.tls.certresolver=myresolver"
+      - "traefik.http.routers.webhook-apps.rule=Host(`${HOST}`) && PathPrefix(`${PATHPREFIX}`)"
+      - "traefik.http.routers.webhook-apps.middlewares=webhook-apps-stripprefix"
+      - "traefik.http.middlewares.webhook-apps-stripprefix.stripprefix.prefixes=${PATHPREFIX}"
+      - "traefik.http.routers.webhook-apps.entrypoints=websecure"
+      - "traefik.http.routers.webhook-apps.tls=true"
+      - "traefik.http.routers.webhook-apps.tls.certresolver=myresolver"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /local/docker:/docker:ro
