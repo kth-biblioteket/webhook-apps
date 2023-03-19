@@ -6,7 +6,7 @@ const { exec } = require('child_process');
 const process = require("process");
 
 const app = express()
-const port = process.env.PORT
+const port = process.env.WEBHOOK_PORT
 const webhook_secret = process.env.WEBHOOK_SECRET
 
 app.use(bodyParser.json());
@@ -64,7 +64,7 @@ apiRoutes.post('/', async function (req, res, next) {
             // Kör deploy-script
             console.log("Start deploy...")
             // await cmd("");
-            exec(`${process.env.GITHUB_DEPLOY_SCRIPT} ${req.body.event} ${req.body.repository.split("/")[1]} ${req.body.commit} ${action} ${process.env.DOCKER_PATH}`, (error, stdout, stderr) => {
+            exec(`${process.env.GITHUB_WEBHOOK_DEPLOY_SCRIPT} ${req.body.event} ${req.body.repository.split("/")[1]} ${req.body.commit} ${action} ${process.env.WEBHOOK_DOCKER_PATH}`, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`exec error: ${error}`);
                     return res.status(401).send({ errorMessage: error });
