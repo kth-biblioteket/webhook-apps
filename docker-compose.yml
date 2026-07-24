@@ -16,8 +16,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /local/docker:/docker:ro
-      - /usr/bin/docker:/usr/bin/docker:ro  # Behövs för docker compose v2
-      - /usr/local/lib/docker/cli-plugins:/usr/local/lib/docker/cli-plugins:ro  # Docker Compose v2 plugin
     networks:
       - apps-net
     # Lägg till healthcheck för bättre övervakning

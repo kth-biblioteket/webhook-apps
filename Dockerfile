@@ -1,23 +1,30 @@
 FROM node:16-alpine
 
-# Installera git, docker och docker-compose
+# Installera baspaket
 RUN apk add --no-cache \
     git \
     docker \
     bash \
-    wget 
+    wget \
+    ca-certificates
 
-# Installera wget om det inte finns
-RUN apk add --no-cache wget
-
-# Installera Docker Compose v2 som Docker-plugin
+# Installera Docker Compose v2
 RUN mkdir -p /usr/local/lib/docker/cli-plugins \
-    && wget -O /usr/local/lib/docker/cli-plugins/docker-compose \
+    && wget -q -O /usr/local/lib/docker/cli-plugins/docker-compose \
     "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
-    && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose \
+    && ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
-# Verifiera installationen
-RUN docker compose version
+# Installera buildx (stabil version)
+RUN mkdir -p /usr/local/lib/docker/cli-plugins \
+    && wget -q -O /usr/local/lib/docker/cli-plugins/docker-buildx \
+    "https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.linux-amd64" \
+    && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+
+# Verifiera
+RUN docker --version \
+    && docker buildx version \
+    && docker-compose --version
 
 WORKDIR /app
 
