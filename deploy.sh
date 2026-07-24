@@ -80,12 +80,12 @@ if [ $? -ne 0 ]; then
 fi
 echo "✅ Containers started successfully"
 
-# Visa containerstatus efter deployment
+# Ta bort dangling images som tar upp utrymme
 echo "========================================="
-echo "📊 Container status after deployment:"
-echo "========================================="
-docker compose ps
+echo "🧹 Cleaning up dangling images..."
+docker image prune -f
 
+# Summering
 echo "========================================="
 echo "✅ Deployment completed successfully!"
 echo "========================================="
