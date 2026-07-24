@@ -82,6 +82,8 @@ networks:
   apps-net:
     external: true
 ```
+> **Observera:** `apps-net` måste vara samma nätverk som Traefik och andra appar använder.
+
 
 ### 3. Skapa `.env`-fil
 
@@ -101,15 +103,7 @@ HOST=api-ref.lib.kth.se
 PATHPREFIX=/webhooks
 ```
 
-### 4. Skapa det externa nätverket
-
-```bash
-sudo docker network create apps-net
-```
-
-> **Observera:** `apps-net` måste vara samma nätverk som Traefik och andra appar använder.
-
-### 5. Starta tjänsten
+### 4. Starta tjänsten
 
 ```bash
 cd /local/docker/webhook-apps
@@ -120,7 +114,7 @@ Bilden dras automatiskt från `ghcr.io/kth-biblioteket/webhook-apps:main`.
 
 > **Observera:** Vid första körningen finns bilden inte lokalt, så `docker compose up -d` **pullar automatiskt** från GHCR. Vid efterföljande uppdateringar krävs `docker compose pull` för att hämta en nyare version.
 
-### 6. Verifiera installationen
+### 5. Verifiera installationen
 
 ```bash
 # Kontrollera att containern körs
@@ -135,7 +129,7 @@ Förväntat svar:
 KTH Biblioteket Webhooks för Apps
 ```
 
-### 7. Konfigurera app-repon (GitHub Actions)
+### 6. Konfigurera app-repon (GitHub Actions)
 
 I varje app-repo som ska deployas via webhooken lägger du till en GitHub Actions-workflow. Workflowen bygger och pushar Docker-bilden till GHCR, och anropar sedan webhook-servern för att trigga deployment.
 
