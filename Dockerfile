@@ -15,10 +15,10 @@ RUN mkdir -p /usr/local/lib/docker/cli-plugins \
     && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose \
     && ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
-# Installera buildx (stabil version)
+# Installera buildx v0.20.0 (krävs för docker compose build)
 RUN mkdir -p /usr/local/lib/docker/cli-plugins \
     && wget -q -O /usr/local/lib/docker/cli-plugins/docker-buildx \
-    "https://github.com/docker/buildx/releases/download/v0.14.1/buildx-v0.14.1.linux-amd64" \
+    "https://github.com/docker/buildx/releases/download/v0.20.0/buildx-v0.20.0.linux-amd64" \
     && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
 
 # Verifiera
