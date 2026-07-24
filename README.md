@@ -31,7 +31,7 @@ Skapa en `.env`-fil med följande variabler:
 | `GITHUB_WEBHOOK_SIGNATURE_HEADER` | HTTP-header för signaturen | `x-hub-signature-256` |
 | `GITHUB_WEBHOOK_DEPLOY_SCRIPT` | Sökväg till deploy-scriptet | `/app/deploy.sh` |
 | `WEBHOOK_DOCKER_PATH` | Sökväg till Docker Compose-filer på hosten | `/docker` |
-| `HOST` | Hostname för Traefik-routing | `webhooks.example.com` |
+| `HOST` | Hostname för Traefik-routing | `api-ref.lib.kth.se` |
 | `PATHPREFIX` | URL-prefix för webhook-endpointen | `/webhook` |
 
 ## Installation på servern
