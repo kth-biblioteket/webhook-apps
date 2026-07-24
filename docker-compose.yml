@@ -5,6 +5,7 @@ services:
     restart: always
     env_file:
       - .env
+    # Traefik labels - används för att konfigurera proxy och cert via Let's Encrypt
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.webhook-apps.rule=Host(`${HOST}`) && PathPrefix(`${PATHPREFIX}`)"
@@ -13,8 +14,14 @@ services:
       - "traefik.http.routers.webhook-apps.entrypoints=websecure"
       - "traefik.http.routers.webhook-apps.tls=true"
       - "traefik.http.routers.webhook-apps.tls.certresolver=myresolver"
+    # Monterade volymer - ger containern tillgång till hostens filer/system
     volumes:
+      # Docker socket - gör att containern kan styra Docker på värden
+      # Behövs för att webhooken ska kunna köra docker commands
       - /var/run/docker.sock:/var/run/docker.sock
+      
+      # Docker compose-filer - read-only (ro)
+      # Webhooken läser compose-filer från denna mapp för deployment
       - /local/docker:/docker:ro
     networks:
       - apps-net
