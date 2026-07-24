@@ -98,7 +98,7 @@ GITHUB_WEBHOOK_SIGNATURE_HEADER=x-hub-signature-256
 GITHUB_WEBHOOK_DEPLOY_SCRIPT=/app/deploy.sh
 WEBHOOK_DOCKER_PATH=/docker
 HOST=api-ref.lib.kth.se
-PATHPREFIX=/webhook
+PATHPREFIX=/webhooks
 ```
 
 ### 4. Skapa det externa nätverket
@@ -127,7 +127,7 @@ Bilden dras automatiskt från `ghcr.io/kth-biblioteket/webhook-apps:main`.
 sudo docker ps | grep webhook-apps
 
 # Testa healthcheck
-curl https://api-ref.lib.kth.se/webhook/hook
+curl https://api-ref.lib.kth.se/webhooks/hook
 ```
 
 Förväntat svar:
