@@ -23,21 +23,6 @@ app.listen(port, (err) => {
     console.log(`server is listening on ${port}`)
 })
 
-function cmd(...command) {
-    let p = exec(command[0], command.slice(1));
-    return new Promise((resolve) => {
-        p.stdout.on("data", (x) => {
-            process.stdout.write(x.toString());
-        });
-        p.stderr.on("data", (x) => {
-            process.stderr.write(x.toString());
-        });
-        p.on("exit", (code) => {
-            resolve(code);
-        });
-    });
-}
-
 function validateSignature(body, secret, signature) {
     console.log("Validating request...")
     var hash = crypto.createHmac(process.env.GITHUB_WEBHOOK_HASHALG, secret)
@@ -46,35 +31,125 @@ function validateSignature(body, secret, signature) {
     return (hash === signature.split("=")[1]);
 }
 
+// Promise wrapper för exec med timeout
+function execPromise(command, options = {}) {
+    return new Promise((resolve, reject) => {
+        const timeout = options.timeout || 300000 // 5 minuter default
+        
+        const child = exec(command, { 
+            ...options,
+            timeout: timeout 
+        }, (error, stdout, stderr) => {
+            if (error) {
+                reject({ error, stdout, stderr })
+            } else {
+                resolve({ stdout, stderr })
+            }
+        })
+        
+        // Logga output i realtid
+        child.stdout.on('data', (data) => {
+            process.stdout.write(data)
+        })
+        child.stderr.on('data', (data) => {
+            process.stderr.write(data)
+        })
+    })
+}
+
 apiRoutes.get('/', function (req, res, next) {
     res.end("KTH Biblioteket Webhooks för Apps")
 });
 
 apiRoutes.post('/', async function (req, res, next) {
+    // Validera signature
     if (!validateSignature(req.body, webhook_secret, req.get(process.env.GITHUB_WEBHOOK_SIGNATURE_HEADER))) {
-        return res.status(401).send({ errorMessage: 'Invalid Signature' });
+        return res.status(401).send({ 
+            errorMessage: 'Invalid Signature',
+            timestamp: new Date().toISOString()
+        })
     }
-    console.log("Signature is valid")
-    console.log("Received payload")
-    console.log(req.body)
+    
+    console.log("✅ Signature is valid")
+    console.log("📦 Received payload:", JSON.stringify(req.body, null, 2))
 
-    var action = req.body.data.action.toLowerCase();
+    var action = req.body.data.action.toLowerCase()
+    
     switch (action) {
         case "deploy":
-            // Kör deploy-script
-            console.log("Start deploy...")
-            // await cmd("");
-            exec(`${process.env.GITHUB_WEBHOOK_DEPLOY_SCRIPT} ${req.body.event} ${req.body.repository.split("/")[1]} ${req.body.commit} ${action} ${process.env.WEBHOOK_DOCKER_PATH}`, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`exec error: ${error}`);
-                    return res.status(401).send({ errorMessage: error });
+            console.log("🚀 Start deploy...")
+            
+            const script = process.env.GITHUB_WEBHOOK_DEPLOY_SCRIPT
+            const event = req.body.event
+            const repository = req.body.repository.split("/")[1]
+            const commit = req.body.commit
+            const dockerPath = process.env.WEBHOOK_DOCKER_PATH
+            
+            if (!script) {
+                console.error("❌ GITHUB_WEBHOOK_DEPLOY_SCRIPT not set in environment")
+                return res.status(500).send({ 
+                    errorMessage: 'Deploy script not configured',
+                    timestamp: new Date().toISOString()
+                })
+            }
+            
+            const command = `${script} ${event} ${repository} ${commit} ${action} ${dockerPath}`
+            console.log(`📋 Running: ${command}`)
+            
+            try {
+                const { stdout, stderr } = await execPromise(command, {
+                    timeout: 600000, // 10 minuter timeout
+                    maxBuffer: 50 * 1024 * 1024 // 50MB buffer
+                })
+                
+                console.log("✅ Deploy completed successfully")
+                
+                // Returnera success
+                return res.status(200).send({
+                    status: 'success',
+                    message: 'Deployment completed',
+                    timestamp: new Date().toISOString(),
+                    repository: repository,
+                    commit: commit
+                })
+                
+            } catch (error) {
+                console.error("❌ Deploy failed")
+                
+                // Logga detaljer
+                if (error.error) {
+                    console.error("Error:", error.error.message)
+                    console.error("Code:", error.error.code)
                 }
-                console.log(stdout);
-            });
-            console.log("Finished deploy...")
-            break;
+                if (error.stdout) {
+                    console.log("stdout:", error.stdout)
+                }
+                if (error.stderr) {
+                    console.error("stderr:", error.stderr)
+                }
+                
+                // Returnera fel
+                return res.status(500).send({
+                    status: 'error',
+                    errorMessage: 'Deployment failed',
+                    details: error.error ? error.error.message : String(error),
+                    timestamp: new Date().toISOString(),
+                    repository: repository,
+                    commit: commit
+                })
+            }
+            
         default:
-            console.log('No handler for type', action);
+            console.log('⚠️ No handler for type:', action)
+            return res.status(204).send()
     }
-    res.status(204).send();
-});
+})
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled error:', err)
+    res.status(500).send({
+        errorMessage: 'Internal server error',
+        timestamp: new Date().toISOString()
+    })
+})

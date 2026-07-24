@@ -1,14 +1,20 @@
 FROM node:16-alpine
 
-# Installera git
-RUN apk add --no-cache git
-
-# Installera docker client
-RUN apk add --no-cache docker
-
-# Installera docker-compose
-RUN apk update && \
-    apk add --no-cache docker-compose
+# Installera alla nödvändiga paket i ett lager
+RUN apk add --no-cache \
+    git \
+    docker \
+    bash \
+    wget \
+    ca-certificates \
+    && mkdir -p /usr/local/lib/docker/cli-plugins \
+    && wget -q -O /usr/local/lib/docker/cli-plugins/docker-compose \
+        "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+    && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose \
+    && ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose \
+    # Verifiera
+    && docker --version \
+    && docker-compose --version
 
 WORKDIR /app
 
